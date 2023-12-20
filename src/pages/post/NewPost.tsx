@@ -1,8 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/naming-convention
 import React, {useState} from "react";
 
-import {saveDataToFirestore} from "../../utils/firestoreUtils";
-// eslint-disable-next-line @typescript-eslint/naming-convention, @typescript-eslint/no-unused-vars
 // eslint-disable-next-line @typescript-eslint/naming-convention
 import Layout from "../../components/layout/Layout";
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -15,6 +13,8 @@ import PostImage from "./PostImage";
 import {Container} from "./NewPostStyles";
 // eslint-disable-next-line @typescript-eslint/naming-convention
 import PostButton from "./PostButton";
+
+import axios from "axios";
 
 interface NewPostProps {}
 
@@ -62,8 +62,11 @@ const NewPost: React.FC<NewPostProps> = () => {
 		};
 
 		try {
-			await saveDataToFirestore("project", postData);
-			console.log("Post saved successfully");
+			const response = await axios.post(
+				"https://us-central1-weather-eottae-49fe1.cloudfunctions.net/project",
+				postData
+			);
+			console.log("Post saved:", response.data);
 			// 성공 처리, 예를 들어 폼 초기화 또는 성공 메시지 표시
 		} catch (error) {
 			console.error("Error saving post:", error);

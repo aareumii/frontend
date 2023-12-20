@@ -1,5 +1,5 @@
 import {doc, setDoc} from "firebase/firestore";
-import {db} from "./firebaseConfig";
+import {db} from "../firebaseConfig";
 
 /**
  * Firestore에 데이터를 저장하는 함수

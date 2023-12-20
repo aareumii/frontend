@@ -16,5 +16,5 @@
 		"jsx": "preserve",
 		"project": "./tsconfig.json"
 	},
-	"include": ["src"]
+	"include": ["src", "firebaseConfig.js"]
 }
