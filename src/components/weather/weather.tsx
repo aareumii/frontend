@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/naming-convention
 import React, {useState, useEffect} from "react";
 import axios from "axios";
 
@@ -15,10 +16,8 @@ const WeatherInfo: React.FC<WeatherInfoProps> = ({onWeatherUpdate}) => {
 	});
 	const [isLoading, setIsLoading] = useState(true);
 
-	const OPEN_WEATHER_MAP_API_KEY =
-		process.env.REACT_APP_OPEN_WEATHER_MAP_API_KEY;
-	const WEATHER_API_ENDPOINT =
-		"https://api.openweathermap.org/data/2.5/weather";
+	const openWeatherMapApiKey = process.env.REACT_APP_OPEN_WEATHER_MAP_API_KEY;
+	const weatherApiEndpoint = "https://api.openweathermap.org/data/2.5/weather";
 
 	useEffect(() => {
 		const getCurrentLocation = (): Promise<{lat: number; lon: number}> => {
@@ -44,16 +43,17 @@ const WeatherInfo: React.FC<WeatherInfoProps> = ({onWeatherUpdate}) => {
 		const fetchWeatherData = async (lat: number, lon: number) => {
 			setIsLoading(true);
 			try {
-				const response = await axios.get(WEATHER_API_ENDPOINT, {
+				const response = await axios.get(weatherApiEndpoint, {
 					params: {
 						lat: lat,
 						lon: lon,
-						appid: OPEN_WEATHER_MAP_API_KEY,
+						appid: openWeatherMapApiKey,
 						units: "metric"
 					}
 				});
 
-				const temperature = response.data.main.temp;
+				// 온도 값을 반올림하여 정수로 변환
+				const temperature = Math.round(response.data.main.temp);
 				setWeatherData({temperature});
 				onWeatherUpdate?.(temperature);
 			} catch (error) {

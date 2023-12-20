@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/naming-convention
 import React, {useState, useEffect} from "react";
 import axios from "axios";
 
@@ -10,12 +11,12 @@ const LocationInfo: React.FC<LocationInfoProps> = ({onLocationUpdate}) => {
 	const [isLoading, setIsLoading] = useState<boolean>(true);
 
 	const fetchLocationName = async (lat: number, lon: number) => {
-		const WEATHER_API_ENDPOINT =
+		const weatherApiEndpoint =
 			"https://api.openweathermap.org/data/2.5/weather";
 
 		setIsLoading(true);
 		try {
-			const response = await axios.get(WEATHER_API_ENDPOINT, {
+			const response = await axios.get(weatherApiEndpoint, {
 				params: {
 					lat,
 					lon,
@@ -41,7 +42,8 @@ const LocationInfo: React.FC<LocationInfoProps> = ({onLocationUpdate}) => {
 				}
 				navigator.geolocation.getCurrentPosition(
 					position => resolve(position.coords),
-					error => reject(error)
+					error => reject(error),
+					{enableHighAccuracy: true} // 고정확도 옵션 활성화
 				);
 			});
 		};
