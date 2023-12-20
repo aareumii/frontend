@@ -2,28 +2,35 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const cors = require("cors")({origin: true});
 
-exports.project = functions.https.onRequest(async (request, response) => {
-	cors(request, response, async () => {
-		try {
-			if (request.method !== "POST") {
-				return response.status(405).json({error: "Method not allowed"});
-			}
+admin.initializeApp(); // Firebase 초기화
+const db = admin.firestore(); // Firestore 인스턴스 참조
 
+exports.project = functions.https.onRequest((request, response) => {
+	cors(request, response, async () => {
+		// CORS 미들웨어 사용
+		if (request.method !== "POST") {
+			response.status(405).send("Method Not Allowed");
+			return;
+		}
+
+		try {
+			// 클라이언트로부터 받은 데이터
 			const postData = request.body;
 
-			const result = await saveDataToFirestore(postData);
-
-			if (result.success) {
-				return response.status(201).json({
-					message: "게시물이 성공적으로 저장되었습니다.",
-					postId: result.postId
-				});
-			} else {
-				return response.status(500).json({error: result.error});
-			}
+			// Firestore에 데이터 저장
+			const docRef = await db.collection("project").add(postData);
+			response.status(200).send({
+				success: true,
+				message: "게시물이 성공적으로 저장되었습니다.",
+				postId: docRef.id
+			});
 		} catch (error) {
-			console.error("오류 발생:", error);
-			return response.status(500).json({error: "서버 오류가 발생했습니다."});
+			console.error("Error adding document: ", error);
+			response.status(500).send({
+				success: false,
+				error: "서버 오류가 발생했습니다.",
+				message: error.message
+			});
 		}
 	});
 });
