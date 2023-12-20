@@ -9,7 +9,7 @@ const RotationSun = keyframes`
   }
 `;
 
-const LoadingContainer = styled.div`
+export const LoadingContainer = styled.div`
 	width: 100%;
 	height: 100vh;
 	display: flex;
@@ -18,13 +18,13 @@ const LoadingContainer = styled.div`
 	align-items: center;
 `;
 
-const LoadingIconContainer = styled.div`
+export const LoadingIconContainer = styled.div`
 	position: relative;
 	width: 110px;
 	height: 73px;
 `;
 
-const LoadingTextContainer = styled.div`
+export const LoadingTextContainer = styled.div`
 	width: 110px;
 	text-align: center;
 	margin-top: 10px;
@@ -33,7 +33,7 @@ const LoadingTextContainer = styled.div`
 	}
 `;
 
-const Sun = styled.img`
+export const Sun = styled.img`
 	position: absolute;
 	width: 70px;
 	height: 70px;
@@ -42,19 +42,10 @@ const Sun = styled.img`
 	right: 3px;
 `;
 
-const Cloud = styled.img`
+export const Cloud = styled.img`
 	position: absolute;
 	width: 80px;
 	height: 80px;
 	left: 7px;
 	bottom: -11px;
 `;
-
-export {
-	RotationSun,
-	LoadingContainer,
-	LoadingIconContainer,
-	LoadingTextContainer,
-	Sun,
-	Cloud
-};
