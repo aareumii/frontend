@@ -1,5 +1,8 @@
 // eslint-disable-next-line @typescript-eslint/naming-convention
 import React, {useState} from "react";
+
+import {saveDataToFirestore} from "../../utils/firestoreUtils";
+// eslint-disable-next-line @typescript-eslint/naming-convention, @typescript-eslint/no-unused-vars
 // eslint-disable-next-line @typescript-eslint/naming-convention
 import Layout from "../../components/layout/Layout";
 // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -44,12 +47,28 @@ const NewPost: React.FC<NewPostProps> = () => {
 		setHashtags(newHashtags);
 	};
 
-	const handleSave = () => {
+	const handleSave = async () => {
 		if (!content.trim() || files.length === 0) {
 			alert("내용과 이미지를 모두 입력해주세요.");
 			return;
 		}
-		// 저장 확인 모달 또는 다른 저장 로직을 추가할 수 있습니다.
+
+		const postData = {
+			content,
+			temperature,
+			location,
+			mediaFiles: files.map(file => file.name),
+			hashtags
+		};
+
+		try {
+			await saveDataToFirestore("project", postData);
+			console.log("Post saved successfully");
+			// 성공 처리, 예를 들어 폼 초기화 또는 성공 메시지 표시
+		} catch (error) {
+			console.error("Error saving post:", error);
+			// 오류 처리, 예를 들어 사용자에게 오류 메시지 표시
+		}
 	};
 
 	const handleCancel = () => {
