@@ -1,9 +1,6 @@
-// eslint-disable-next-line @typescript-eslint/naming-convention
 import React from "react";
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 import Layout from "./components/layout/Layout";
-// eslint-disable-next-line @typescript-eslint/naming-convention
 import NotFound from "./pages/not-found/NotFound";
 
 import {BrowserRouter as Router, Routes, Route} from "react-router-dom";

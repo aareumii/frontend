@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/naming-convention
 import React from "react";
 import {Link} from "react-router-dom";
 

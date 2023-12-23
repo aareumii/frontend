@@ -1,4 +1,3 @@
-// eslint-disable-next-line @typescript-eslint/naming-convention
 import React from "react";
 
 import sun from "../../assets/img/loading/sun.svg";
