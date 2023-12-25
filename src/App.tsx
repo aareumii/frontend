@@ -5,6 +5,8 @@ import NotFound from "./pages/not-found/NotFound";
 
 import {BrowserRouter as Router, Routes, Route} from "react-router-dom";
 
+import ModalManager from "./components/modal/ModalManager";
+
 const App: React.FC = () => {
 	return (
 		<div className="App">
@@ -15,6 +17,7 @@ const App: React.FC = () => {
 					<Route path="*" element={<NotFound />} />
 				</Routes>
 			</Router>
+			<ModalManager />
 		</div>
 	);
 };
