@@ -53,12 +53,26 @@ const NewPost: React.FC<NewPostProps> = () => {
 			return;
 		}
 
+		const currentTime = new Date();
+		const formattedTime = new Intl.DateTimeFormat("ko-KR", {
+			year: "numeric",
+			month: "2-digit",
+			day: "2-digit",
+			hour: "2-digit",
+			minute: "2-digit",
+			hour12: false
+		})
+			.format(currentTime)
+			.replace(/\./g, "")
+			.replace(" ", "T");
+
 		const postData = {
 			content,
 			temperature,
 			location,
 			mediaFiles: files.map(file => file.name),
-			hashtags
+			hashtags,
+			createdAt: formattedTime
 		};
 
 		try {
@@ -92,7 +106,11 @@ const NewPost: React.FC<NewPostProps> = () => {
 					onContentChange={handleContentChange}
 					onHashtagsChange={handleHashtagsChange}
 				/>
-				<PostButton onSave={handleSave} onCancel={handleCancel} />
+				<PostButton
+					onSave={handleSave}
+					onCancel={handleCancel}
+					isEditing={false}
+				/>
 			</Container>
 		</Layout>
 	);

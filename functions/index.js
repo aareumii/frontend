@@ -1,5 +1,8 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const functions = require("firebase-functions");
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const admin = require("firebase-admin");
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const cors = require("cors")({origin: true});
 
 admin.initializeApp(); // Firebase 초기화
