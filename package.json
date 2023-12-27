@@ -12,6 +12,7 @@
     "@typescript-eslint/eslint-plugin": "^6.14.0",
     "@typescript-eslint/parser": "^6.14.0",
     "axios": "^1.6.2",
+    "busboy": "^1.6.0",
     "eslint-plugin-html": "^7.1.0",
     "eslint-plugin-react": "^7.33.2",
     "firebase": "^10.7.1",

@@ -1,5 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/naming-convention
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useRef} from "react";
 import {IoIosArrowBack, IoIosArrowForward} from "react-icons/io";
 import {
 	Container,
@@ -16,30 +15,67 @@ import {
 	DeleteButton
 } from "./PostImageStyles";
 
+import {storage} from "../../firebaseConfig";
+import {ref, uploadBytes, getDownloadURL} from "firebase/storage";
+
 const maxFiles = 3;
 
 interface ImageWrapProps {
 	initialFiles?: File[];
-	onFilesChange: (newFiles: File[]) => void;
+	onFilesChange: (urls: string[]) => void;
 }
 
-const isVideo = (file: File) => {
+const isVideoFile = (file: File) => {
 	return file.type.split("/")[0] === "video";
 };
 
 const PostImage: React.FC<ImageWrapProps> = ({initialFiles, onFilesChange}) => {
 	const [files, setFiles] = useState<File[]>(initialFiles || []);
-	const [currentFileIndex, setCurrentFileIndex] = useState(0);
+	const [currentFileIndex, setCurrentFileIndex] = useState<number>(0);
 	const [fileUrls, setFileUrls] = useState<string[]>([]);
 
-	useEffect(() => {
-		const newUrls = files.map(file => URL.createObjectURL(file));
-		setFileUrls(prevUrls => [...prevUrls, ...newUrls]);
+	const uploadFileToStorage = async (file: File): Promise<string> => {
+		const timestamp = new Date().getTime();
+		const storageRef = ref(storage, `images/${timestamp}-${file.name}`);
+		await uploadBytes(storageRef, file);
+		return getDownloadURL(storageRef);
+	};
 
-		return () => {
-			newUrls.forEach(url => URL.revokeObjectURL(url));
+	// onFilesChange 함수에 대한 ref를 생성
+	const onFilesChangeRef = useRef(onFilesChange);
+	// 컴포넌트가 렌더링될 때마다 최신의 onFilesChange 함수를 ref에 할당
+	onFilesChangeRef.current = onFilesChange;
+
+	useEffect(() => {
+		const uploadFiles = async () => {
+			try {
+				const urls = await Promise.all(files.map(uploadFileToStorage));
+				setFileUrls(urls);
+				// 최신 onFilesChange 함수를 ref에서 가져와 사용
+				onFilesChangeRef.current(urls);
+			} catch (error) {
+				console.error("Error uploading files:", error);
+				alert("파일 업로드 중 에러가 발생했습니다.");
+			}
 		};
-	}, [files]);
+
+		if (files.length > 0) {
+			uploadFiles();
+		} else {
+			setFileUrls([]);
+			onFilesChangeRef.current([]); // 여기도 ref를 사용
+		}
+	}, [files]); // onFilesChange를 의존성 배열에서 제거
+
+	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		if (event.target.files) {
+			const newFiles = Array.from(event.target.files).slice(
+				0,
+				maxFiles - files.length
+			);
+			setFiles(prevFiles => [...prevFiles, ...newFiles]);
+		}
+	};
 
 	const handleFileDeletion = (index: number) => {
 		// eslint-disable-next-line @typescript-eslint/naming-convention
@@ -48,20 +84,7 @@ const PostImage: React.FC<ImageWrapProps> = ({initialFiles, onFilesChange}) => {
 		const updatedUrls = fileUrls.filter((_, urlIndex) => urlIndex !== index);
 		setFiles(updatedFiles);
 		setFileUrls(updatedUrls);
-		setCurrentFileIndex(0);
-		onFilesChange(updatedFiles);
-	};
-
-	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-		if (event.target.files) {
-			const filesArray = Array.from(event.target.files).slice(
-				0,
-				maxFiles - files.length
-			);
-			setFiles(prevFiles => [...prevFiles, ...filesArray]);
-			onFilesChange([...files, ...filesArray]);
-			setCurrentFileIndex(files.length > 0 ? currentFileIndex : 0);
-		}
+		onFilesChange(updatedUrls);
 	};
 
 	const handlePrev = () => {
@@ -91,16 +114,12 @@ const PostImage: React.FC<ImageWrapProps> = ({initialFiles, onFilesChange}) => {
 				{files.length > 0 && (
 					<ImagePreviewContainer>
 						<PrevButton
-							onClick={() => {
-								if (currentFileIndex > 0) {
-									handlePrev();
-								}
-							}}
+							onClick={handlePrev}
 							isDisabled={currentFileIndex === 0}
 						>
 							<IoIosArrowBack />
 						</PrevButton>
-						{isVideo(files[currentFileIndex]) ? (
+						{isVideoFile(files[currentFileIndex]) ? (
 							<VideoPreview controls>
 								<source
 									src={URL.createObjectURL(files[currentFileIndex])}
@@ -115,11 +134,7 @@ const PostImage: React.FC<ImageWrapProps> = ({initialFiles, onFilesChange}) => {
 							/>
 						)}
 						<NextButton
-							onClick={() => {
-								if (currentFileIndex < files.length - 1) {
-									handleNext();
-								}
-							}}
+							onClick={handleNext}
 							isDisabled={currentFileIndex === files.length - 1}
 						>
 							<IoIosArrowForward />

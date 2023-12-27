@@ -1,7 +1,7 @@
 import {initializeApp} from "firebase/app";
 import {getFirestore} from "firebase/firestore";
+import {getStorage} from "firebase/storage";
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
 	apiKey: "AIzaSyA-eRwi6AEHf3qw0aUcCo6A2b1gZTqVi2o",
 	authDomain: "weather-eottae-49fe1.firebaseapp.com",
@@ -11,10 +11,8 @@ const firebaseConfig = {
 	appId: "1:890779799053:web:58f1bf38e9814cb68a4f44"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// Initialize Firestore
 const db = getFirestore(app);
+const storage = getStorage(app);
 
-export {app, db};
+export {app, db, storage};

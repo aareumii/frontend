@@ -1,39 +1,37 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const functions = require("firebase-functions");
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const admin = require("firebase-admin");
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+const busboy = require("busboy");
 const cors = require("cors")({origin: true});
 
-admin.initializeApp(); // Firebase 초기화
-const db = admin.firestore(); // Firestore 인스턴스 참조
+admin.initializeApp();
 
-exports.project = functions.https.onRequest((request, response) => {
-	cors(request, response, async () => {
-		// CORS 미들웨어 사용
-		if (request.method !== "POST") {
-			response.status(405).send("Method Not Allowed");
-			return;
+exports.api = functions.https.onRequest((req, res) => {
+	cors(req, res, () => {
+		if (req.method !== "POST") {
+			return res.status(405).send("Method Not Allowed");
 		}
 
-		try {
-			// 클라이언트로부터 받은 데이터
-			const postData = request.body;
+		// Busboy 인스턴스를 생성하는 새로운 방식
+		const bb = busboy({headers: req.headers});
+		let formData = {};
 
-			// Firestore에 데이터 저장
-			const docRef = await db.collection("project").add(postData);
-			response.status(200).send({
-				success: true,
-				message: "게시물이 성공적으로 저장되었습니다.",
-				postId: docRef.id
-			});
-		} catch (error) {
-			console.error("Error adding document: ", error);
-			response.status(500).send({
-				success: false,
-				error: "서버 오류가 발생했습니다.",
-				message: error.message
-			});
-		}
+		bb.on("field", (fieldname, val) => {
+			formData[fieldname] = val;
+		});
+
+		// 파일 처리 로직 (필요한 경우)
+		// bb.on("file", (fieldname, file, info) => { ... });
+
+		bb.on("finish", async () => {
+			try {
+				await admin.firestore().collection("project").add(formData);
+				res.status(200).send("Project post added.");
+			} catch (error) {
+				console.error("Error adding project post", error);
+				res.status(500).send("Internal Server Error");
+			}
+		});
+
+		bb.end(req.rawBody);
 	});
 });

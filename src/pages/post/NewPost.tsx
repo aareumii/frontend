@@ -14,6 +14,8 @@ import {Container} from "./NewPostStyles";
 // eslint-disable-next-line @typescript-eslint/naming-convention
 import PostButton from "./PostButton";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 import axios from "axios";
 
 interface NewPostProps {}
@@ -23,7 +25,7 @@ const NewPost: React.FC<NewPostProps> = () => {
 	const [location, setLocation] = useState<string>("");
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [temperature, setTemperature] = useState<number | null>(null);
-	const [files, setFiles] = useState<File[]>([]); // 파일 목록을 저장할 배열
+	const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
 	const [content, setContent] = useState<string>("");
 	const [hashtags, setHashtags] = useState<string>("");
 
@@ -35,8 +37,8 @@ const NewPost: React.FC<NewPostProps> = () => {
 		setTemperature(newTemperature);
 	};
 
-	const handleFilesChange = (newFiles: File[]) => {
-		setFiles(newFiles);
+	const handleFilesChange = (urls: string[]) => {
+		setUploadedUrls(urls); // 업로드된 파일 URL을 상태에 저장
 	};
 
 	const handleContentChange = (newContent: string) => {
@@ -48,43 +50,42 @@ const NewPost: React.FC<NewPostProps> = () => {
 	};
 
 	const handleSave = async () => {
-		if (!content.trim() || files.length === 0) {
+		if (!content.trim() || uploadedUrls.length === 0) {
 			alert("내용과 이미지를 모두 입력해주세요.");
 			return;
 		}
 
-		const currentTime = new Date();
-		const formattedTime = new Intl.DateTimeFormat("ko-KR", {
-			year: "numeric",
-			month: "2-digit",
-			day: "2-digit",
-			hour: "2-digit",
-			minute: "2-digit",
-			hour12: false
-		})
-			.format(currentTime)
-			.replace(/\./g, "")
-			.replace(" ", "T");
+		// FormData 객체를 생성
+		const formData = new FormData();
+		formData.append("content", content);
+		if (temperature !== null) {
+			formData.append("temperature", temperature.toString());
+		}
+		formData.append("location", location);
+		formData.append("hashtags", hashtags);
 
-		const postData = {
-			content,
-			temperature,
-			location,
-			mediaFiles: files.map(file => file.name),
-			hashtags,
-			createdAt: formattedTime
-		};
+		// 업로드된 URL을 FormData에 추가
+		uploadedUrls.forEach((url, index) => {
+			formData.append(`uploadedUrls[${index}]`, url);
+		});
 
 		try {
 			const response = await axios.post(
-				"https://us-central1-weather-eottae-49fe1.cloudfunctions.net/project",
-				postData
+				"https://us-central1-weather-eottae-49fe1.cloudfunctions.net/api",
+				formData,
+				{
+					headers: {
+						// eslint-disable-next-line @typescript-eslint/naming-convention
+						"Content-Type": "multipart/form-data"
+					}
+				}
 			);
 			console.log("Post saved:", response.data);
-			// 성공 처리, 예를 들어 폼 초기화 또는 성공 메시지 표시
+			alert("게시물이 성공적으로 저장되었습니다.");
+			// 성공 후 추가적인 로직 (예: 페이지 리디렉션)
 		} catch (error) {
 			console.error("Error saving post:", error);
-			// 오류 처리, 예를 들어 사용자에게 오류 메시지 표시
+			alert("게시물 저장 중 오류가 발생했습니다.");
 		}
 	};
 
@@ -99,7 +100,9 @@ const NewPost: React.FC<NewPostProps> = () => {
 					onLocationUpdate={handleLocationChange}
 					onTemperatureChange={handleTemperatureChange}
 				/>
-				<PostImage initialFiles={files} onFilesChange={handleFilesChange} />
+				<PostImage
+					onFilesChange={(urls: string[]) => handleFilesChange(urls)}
+				/>
 				<PostContent
 					content={content}
 					hashtags={hashtags}
