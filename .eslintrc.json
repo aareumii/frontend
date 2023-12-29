@@ -18,7 +18,7 @@
 	},
 	"plugins": ["@typescript-eslint", "react", "html"],
 	"rules": {
-		"indent": ["error", "tab"],
+		"indent": ["off"],
 		"linebreak-style": "off",
 		"quotes": ["error", "double"],
 		"semi": ["error", "always"],
