@@ -1,6 +1,10 @@
 import React from "react";
 
 import Layout from "./components/layout/Layout";
+import Login from "./pages/login";
+import Signup from "./pages/SignUp";
+import NewPost from "./pages/post/NewPost";
+import EditPost from "./pages/post/EditPost";
 import NotFound from "./pages/not-found/NotFound";
 
 import {BrowserRouter as Router, Routes, Route} from "react-router-dom";
@@ -13,6 +17,10 @@ const App: React.FC = () => {
 			<Router>
 				<Routes>
 					<Route path="/" element={<Layout></Layout>} />
+					<Route path="/login" element={<Login />} />
+					<Route path="/signup" element={<Signup />} />
+					<Route path="/archive" element={<NewPost />} />
+					<Route path="/editpost/:postId" element={<EditPost />} />
 
 					<Route path="*" element={<NotFound />} />
 				</Routes>
