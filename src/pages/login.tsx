@@ -4,21 +4,23 @@ import styled from "styled-components";
 import login from "../../src/assets/img/login/login.png";
 import devicon_google from "../../src/assets/img/login/devicon_google.png";
 import kakao from "../assets/img/login/kakao.png";
-import { useDispatch } from "react-redux";
-import { authActionCreator } from "../redux/thunk/AuthThunk";
+//import { useDispatch } from "react-redux";
+//import { authActionCreator } from "../redux/thunk/AuthThunk";
 import { signInWithGoogle } from "../../src/utils/GoogleAuth";
+import { getAuth,signInWithEmailAndPassword } from "firebase/auth";
 
 interface Props {}
 
 const Login: React.FC<Props> = () => {
-  const [userId, setUserId] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const navigate = useNavigate();
-  const dispatch = useDispatch();
+  //const dispatch = useDispatch();
+
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.name === "email") {
-      setUserId(e.target.value);
+      setEmail(e.target.value);
     } else if (e.target.name === "password") {
       setPassword(e.target.value);
     }
@@ -26,8 +28,23 @@ const Login: React.FC<Props> = () => {
 
   const handleSubmit = async (e: FormEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    await authActionCreator(userId, password)(dispatch);
+    //await authActionCreator(userId, password)(dispatch);
+    const auth = getAuth();
+    signInWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+    // Signed in
+    const user = userCredential.user;
+    window.alert("로그인 되었습니다.")
     navigate("/");
+    console.log(user);
+    // ...
+  })
+  .catch((error) => {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    console.log(errorCode, errorMessage);
+  });
+    
   };
 
   const googleLogin = () => {
@@ -53,7 +70,7 @@ const Login: React.FC<Props> = () => {
             <div className="textfield-container">
               <input
                 type="text"
-                value={userId}
+                value={email}
                 name="email"
                 id=""
                 placeholder="이메일"
