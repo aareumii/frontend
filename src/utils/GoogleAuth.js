@@ -6,16 +6,15 @@ import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+
+
 const firebaseConfig = {
-  apiKey: "AIzaSyA_6Jaj9NVcAaxueyoCEvYGnWUxsoPf2tI",
-  authDomain: "easylogin-98763.firebaseapp.com",
-  projectId: "easylogin-98763",
-  storageBucket: "easylogin-98763.appspot.com",
-  messagingSenderId: "783928541301",
-  appId: "1:783928541301:web:0d0cb9645b1fc3965a783c",
-  measurementId: "G-RS5ES26W0B"
+	apiKey: "AIzaSyA-eRwi6AEHf3qw0aUcCo6A2b1gZTqVi2o",
+	authDomain: "weather-eottae-49fe1.firebaseapp.com",
+	projectId: "weather-eottae-49fe1",
+	storageBucket: "weather-eottae-49fe1.appspot.com",
+	messagingSenderId: "890779799053",
+	appId: "1:890779799053:web:58f1bf38e9814cb68a4f44"
 };
 
 // Initialize Firebase

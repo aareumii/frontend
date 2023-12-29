@@ -43,6 +43,14 @@
 			{
 				"selector": "typeLike",
 				"format": ["PascalCase"]
+			},
+			{
+				"selector": "import",
+				"format": null,
+				"custom": {
+					"regex": ".*",
+					"match": true
+				}
 			}
 		]
 	}

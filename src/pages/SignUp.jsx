@@ -2,12 +2,14 @@ import { getAuth, createUserWithEmailAndPassword, Auth, UserCredential } from "f
 import React, { useState } from "react";
 import weather from "../assets/img/login/weather.png";
 import styled from "styled-components";
+import {useNavigate } from "react-router-dom";
 
 // Assuming you have a functional component
 const RegistrationComponent: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const navigate = useNavigate();
 
   const handleRegistration = async () => {
     try {
@@ -16,7 +18,8 @@ const RegistrationComponent: React.FC = () => {
       const user = userCredential.user;
       console.log(user)
       // Additional logic if needed...
-      window.alert("회원가입이 완료되었습니다.")
+      window.alert("회원가입이 완료되었습니다. 로그인 해주세요")
+      navigate("/")
       // Clear the form after successful registration
       setEmail("");
       setPassword("");
