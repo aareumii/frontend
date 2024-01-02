@@ -1,10 +1,9 @@
-// eslint-disable-next-line @typescript-eslint/naming-convention
 import React, {ChangeEvent} from "react";
 import {Container, ContentTextarea, HashtagTextarea} from "./PostContentStyles";
 
 interface EditContentProps {
 	content: string;
-	hashtags: string;
+	hashtags: string[];
 	handleContentChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
 	handleHashtagsChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
 }

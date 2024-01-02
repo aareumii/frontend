@@ -1,29 +1,26 @@
-/* eslint-disable indent */
-// eslint-disable-next-line @typescript-eslint/naming-convention
 import React, {useState, useEffect} from "react";
 import {IoIosArrowBack, IoIosArrowForward} from "react-icons/io";
 import {
 	Container,
-	ButtonGroup,
 	ImagePreviewContainer,
 	PrevButton,
 	NextButton,
-	ImageUploader,
 	UploadWrap,
 	UploadButton,
 	UploadText,
-	DeleteButton
+	DeleteButton,
+	ImageUploader
 } from "./EditImageStyles";
 
-interface EditImageProps {
-	mediaFiles: (string | File)[];
+interface EditImagesProps {
+	uploadedUrls: (string | File)[];
 	onImageChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
 	onImageDelete: (index: number) => void;
 	maxFiles: number;
 }
 
-const EditImage: React.FC<EditImageProps> = ({
-	mediaFiles,
+const EditImage: React.FC<EditImagesProps> = ({
+	uploadedUrls,
 	onImageChange,
 	onImageDelete,
 	maxFiles
@@ -31,64 +28,87 @@ const EditImage: React.FC<EditImageProps> = ({
 	const [currentSlide, setCurrentSlide] = useState(0);
 
 	const nextSlide = () => {
-		setCurrentSlide(prev => (prev + 1) % mediaFiles.length);
+		setCurrentSlide(prev => (prev + 1) % uploadedUrls.length);
 	};
 
 	const prevSlide = () => {
-		setCurrentSlide(prev => (prev - 1 + mediaFiles.length) % mediaFiles.length);
+		setCurrentSlide(
+			prev => (prev - 1 + uploadedUrls.length) % uploadedUrls.length
+		);
 	};
 
 	const handleFileDeletion = () => {
 		onImageDelete(currentSlide);
 	};
-	// 이미지 불러오기 확인을 위해 useEffect 사용
+
 	useEffect(() => {
-		console.log("Media Files:", mediaFiles);
-	}, [mediaFiles]);
+		console.log("Uploaded URLs:", uploadedUrls);
+	}, [uploadedUrls]);
 
 	return (
 		<Container>
-			{mediaFiles.length > 0 && (
+			{uploadedUrls.length > 0 && (
 				<ImagePreviewContainer>
-					{typeof mediaFiles[currentSlide] === "string" ? (
-						<img
-							src={mediaFiles[currentSlide] as string}
-							alt={`Image ${currentSlide}`}
-						/>
-					) : (
-						<div>Image not available</div>
-					)}
-					<ButtonGroup>
-						<PrevButton onClick={prevSlide} isDisabled={mediaFiles.length <= 1}>
-							<IoIosArrowBack />
-						</PrevButton>
-						<NextButton onClick={nextSlide} isDisabled={mediaFiles.length <= 1}>
-							<IoIosArrowForward />
-						</NextButton>
-					</ButtonGroup>
+					{uploadedUrls.map((url, index) => {
+						if (url instanceof File) {
+							const isVideo = url.type.startsWith("video/");
+							return isVideo ? (
+								<video
+									key={index}
+									controls
+									style={{display: index === currentSlide ? "block" : "none"}}
+								>
+									<source src={URL.createObjectURL(url)} type={url.type} />
+									비디오를 표시할 수 없습니다.
+								</video>
+							) : (
+								<img
+									key={index}
+									src={URL.createObjectURL(url)}
+									alt={`Media at ${index}`}
+									style={{display: index === currentSlide ? "block" : "none"}}
+								/>
+							);
+						} else {
+							return (
+								<img
+									key={index}
+									src={url}
+									alt={`Media at ${index}`}
+									style={{display: index === currentSlide ? "block" : "none"}}
+								/>
+							);
+						}
+					})}
+					<PrevButton onClick={prevSlide} isDisabled={uploadedUrls.length <= 1}>
+						<IoIosArrowBack />
+					</PrevButton>
+
+					<NextButton onClick={nextSlide} isDisabled={uploadedUrls.length <= 1}>
+						<IoIosArrowForward />
+					</NextButton>
 				</ImagePreviewContainer>
 			)}
-
 			<ImageUploader>
 				<input
 					type="file"
 					multiple={maxFiles > 1}
 					accept="image/*,video/*"
 					onChange={onImageChange}
-					disabled={mediaFiles.length >= maxFiles}
-					id="media-upload" // 아이디 변경
+					disabled={uploadedUrls.length >= maxFiles}
+					id="media-upload"
 					hidden
 				/>
 				<UploadWrap>
 					<UploadButton
-						htmlFor="media-upload" // 아이디 변경
-						disabled={mediaFiles.length >= maxFiles}
+						htmlFor="media-upload"
+						disabled={uploadedUrls.length >= maxFiles}
 					>
-						{mediaFiles.length < maxFiles
-							? "이미지 추가하기"
+						{uploadedUrls.length < maxFiles
+							? "이미지/동영상 추가하기"
 							: "업로드 제한 도달"}
 					</UploadButton>
-					<UploadText>업로드된 미디어 수: {mediaFiles.length}</UploadText>
+					<UploadText>업로드된 미디어 수: {uploadedUrls.length}</UploadText>
 					<DeleteButton onClick={handleFileDeletion}>Delete</DeleteButton>
 				</UploadWrap>
 			</ImageUploader>

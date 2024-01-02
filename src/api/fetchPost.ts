@@ -1,69 +1,33 @@
-import {db} from "../firebaseConfig";
-import {doc, getDoc, Timestamp} from "firebase/firestore";
+import {getFirestore, doc, getDoc} from "firebase/firestore";
 
-// PostData 인터페이스 정의
-interface PostData {
-	content: string;
-	temperature: number;
-	location: string;
-	hashtags: string[]; // 해시태그 배열로 수정
-	date: string | null;
-	imageUrl: string[];
-	createdAt: string;
-	mediaFiles: string[];
-}
+const fetchPost = async (documentId: string) => {
+	const db = getFirestore();
+	const docRef = doc(db, "project", documentId);
+	const docSnap = await getDoc(docRef);
 
-export async function fetchPost(postId: string): Promise<PostData> {
-	try {
-		const docRef = doc(db, "project", postId);
-		const docSnapshot = await getDoc(docRef);
+	if (docSnap.exists()) {
+		const docData = docSnap.data();
+		const uploadedUrls = [];
 
-		if (!docSnapshot.exists()) {
-			throw new Error("게시물을 찾을 수 없습니다");
+		// Extracting all 'uploadedUrls'
+		for (const key in docData) {
+			if (key.startsWith("uploadedUrls")) {
+				uploadedUrls.push(docData[key]);
+			}
 		}
 
-		const data = docSnapshot.data();
-
-		// createdAt을 Timestamp로 변환 (null 또는 문자열일 경우 처리 추가)
-		const createdAt =
-			data.createdAt &&
-			typeof data.createdAt.toDate === "function" &&
-			!isNaN(data.createdAt.toDate().getTime())
-				? data.createdAt.toDate().toISOString()
-				: null;
-
-		const defaultPostData: PostData = {
-			content: "",
-			temperature: 0,
-			imageUrl: [], // 이미지 URL 배열 초기화
-			location: "",
-			hashtags: [], // 해시태그 배열 초기화
-			date: null,
-			createdAt: "",
-			mediaFiles: []
+		return {
+			content: docData.content || "",
+			hashtags: docData.hashtags || "",
+			location: docData.location || "",
+			temperature: docData.temperature || "",
+			currentDateAndTime: docData.currentDateAndTime || "",
+			uploadedUrls: uploadedUrls
 		};
-
-		const postData: PostData = {
-			...defaultPostData,
-			...data,
-			date: data.date ? (data.date as Timestamp).toDate().toISOString() : null,
-			temperature: data.temperature ? parseInt(data.temperature.toString()) : 0,
-			createdAt: createdAt
-		};
-
-		// 해시태그 정보 변환
-		if (data.hashtags && Array.isArray(data.hashtags)) {
-			postData.hashtags = data.hashtags.map((tag: string) => tag.trim());
-		}
-
-		// 이미지 URL 정보 저장
-		if (data.mediaFiles && Array.isArray(data.mediaFiles)) {
-			postData.imageUrl = data.mediaFiles.map((file: string) => file.trim());
-		}
-
-		return postData;
-	} catch (error) {
-		console.error("Firestore에서 게시물 가져오기 오류:", error);
-		throw error;
+	} else {
+		console.log("No such document!");
+		return null; // Document does not exist
 	}
-}
+};
+
+export default fetchPost;

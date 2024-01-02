@@ -16,10 +16,14 @@ import {
 interface PostTopProps {
 	temperature: number;
 	location: string;
-	date: string;
+	currentDateAndTime: string;
 }
 
-const EditPostTop: React.FC<PostTopProps> = ({temperature, location, date}) => {
+const EditPostTop: React.FC<PostTopProps> = ({
+	temperature,
+	location,
+	currentDateAndTime
+}) => {
 	const navigate = useNavigate();
 
 	const handleBack = () => {
@@ -27,16 +31,11 @@ const EditPostTop: React.FC<PostTopProps> = ({temperature, location, date}) => {
 	};
 
 	// 날짜 형식을 읽기 쉬운 형태로 변환
-	const formattedDate = new Date(date).toLocaleDateString("ko-KR", {
-		year: "numeric",
-		month: "long",
-		day: "numeric"
-	});
 
 	return (
 		<Wrap>
 			<Top>
-				<BackButton onClick={handleBack}>
+				<BackButton color="#000" onClick={handleBack}>
 					<HiArrowLeft />
 				</BackButton>
 				<Title>게시물 수정</Title>
@@ -49,7 +48,7 @@ const EditPostTop: React.FC<PostTopProps> = ({temperature, location, date}) => {
 					<p>{temperature ? `${temperature}°C` : "온도 정보 없음"}</p>
 				</Place>
 				<DateInfo>
-					<span>{formattedDate}</span> {/* 수정된 날짜 형식 사용 */}
+					<span>{currentDateAndTime}</span> {/* 수정된 날짜 형식 사용 */}
 				</DateInfo>
 			</Bottom>
 		</Wrap>

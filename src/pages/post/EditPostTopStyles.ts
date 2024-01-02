@@ -17,7 +17,7 @@ export const Top = styled.div`
 	border-bottom: 2px solid #000;
 `;
 
-export const BackButton = styled.button`
+export const BackButton = styled.div`
 	position: absolute;
 	border: none;
 	background-color: transparent;

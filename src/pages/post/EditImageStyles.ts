@@ -1,4 +1,3 @@
-// eslint-disable-next-line quotes
 import styled from "styled-components";
 
 export const Container = styled.div`
@@ -78,7 +77,7 @@ export const PrevButton = styled.button<{isDisabled: boolean}>`
 	position: absolute;
 	top: 50%;
 	width: 5%;
-	height: 5%;
+	height: 10%;
 	left: 10%;
 
 	opacity: ${props =>
@@ -89,7 +88,7 @@ export const PrevButton = styled.button<{isDisabled: boolean}>`
 
 export const NextButton = styled.button<{isDisabled: boolean}>`
 	position: absolute;
-	width: 10%;
+	width: 5%;
 	height: 10%;
 	top: 50%;
 	right: 10%;

@@ -17,7 +17,7 @@ const App: React.FC = () => {
 				<Routes>
 					<Route path="/" element={<Layout></Layout>} />
 					<Route path="/archive" element={<NewPost />} />
-					<Route path="/editpost/:postId" element={<EditPost />} />
+					<Route path="/editpost/:documentId" element={<EditPost />} />
 				</Routes>
 			</Router>
 		</div>

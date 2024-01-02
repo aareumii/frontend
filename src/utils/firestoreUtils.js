@@ -12,7 +12,7 @@ export const saveDataToFirestore = async (project, data) => {
 		const docRef = doc(db, project);
 		await setDoc(docRef, {
 			...data,
-			createdAt: new Date()
+			date: new Date()
 		});
 		console.log("Document written with ID:", docRef.id);
 		return docRef;

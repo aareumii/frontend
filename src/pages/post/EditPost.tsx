@@ -1,159 +1,169 @@
-// eslint-disable-next-line @typescript-eslint/naming-convention
-import React, {useState, ChangeEvent, useEffect} from "react";
+import React, {useState, useEffect} from "react";
+import {ChangeEvent} from "react";
 import {useParams} from "react-router-dom";
-// eslint-disable-next-line @typescript-eslint/naming-convention
+import fetchPost from "../../api/fetchPost";
 import Layout from "../../components/layout/Layout";
-import {Container} from "./NewPostStyles";
-// eslint-disable-next-line @typescript-eslint/naming-convention
 import EditPostTop from "./EditPostTop";
-// eslint-disable-next-line @typescript-eslint/naming-convention
 import EditImage from "./EditImage";
-// eslint-disable-next-line @typescript-eslint/naming-convention
 import EditContent from "./EditContent";
-// eslint-disable-next-line @typescript-eslint/naming-convention
+import {Container} from "./NewPostStyles";
 import PostButton from "./PostButton";
-import {fetchPost} from "../../api/fetchPost";
+import updatePost from "../../api/updatePost";
+import deletePost from "../../api/deletePost";
+import {useNavigate} from "react-router-dom";
 
 const maxFiles = 3;
 
-interface EditPostProps {}
-
+// Define the PostData interface
 interface PostData {
-	date: string;
-	temperature: number;
-	location: string;
-	mediaFiles: (string | File)[];
 	content: string;
 	hashtags: string;
-	createdAt: string;
+	location: string;
+	temperature: number;
+	currentDateAndTime: string;
+	uploadedUrls: (string | File)[];
 }
 
-const EditPost: React.FC<EditPostProps> = () => {
-	const {postId} = useParams();
-	const [postData, setPostData] = useState<PostData>({
-		date: "",
-		temperature: 0,
-		location: "",
-		mediaFiles: [],
-		content: "",
-		hashtags: "",
-		createdAt: ""
-	});
+const EditPost: React.FC = () => {
+	const navigate = useNavigate();
+	const {documentId} = useParams<{documentId: string}>();
+	const [postData, setPostData] = useState<PostData | null>(null);
 
 	useEffect(() => {
-		const loadPost = async () => {
-			if (!postId) {
-				console.error("postId is undefined");
-				return;
-			}
-			try {
-				const fetchedData = await fetchPost(postId);
-				setPostData({
-					date: fetchedData.createdAt ?? "",
-					temperature: fetchedData.temperature,
-					location: fetchedData.location,
-					mediaFiles: fetchedData.mediaFiles || [], // 이미지 데이터를 빈 배열로 초기화
-					content: fetchedData.content,
-					hashtags: Array.isArray(fetchedData.hashtags)
-						? fetchedData.hashtags.join(" ")
-						: fetchedData.hashtags || "",
-					createdAt: new Date(fetchedData.createdAt).toLocaleDateString(
-						"ko-KR",
-						{
-							year: "numeric",
-							month: "long",
-							day: "numeric"
-						}
-					)
-				});
-				console.log("Media Files:", fetchedData.mediaFiles);
-			} catch (error) {
-				console.error("Error loading post:", error);
+		const fetchData = async () => {
+			if (documentId) {
+				// Fetch post data using fetchPost
+				const data = await fetchPost(documentId);
+				if (data) {
+					// Update postData state
+					setPostData({
+						content: data.content,
+						hashtags: data.hashtags,
+						location: data.location,
+						temperature: data.temperature,
+						uploadedUrls: data.uploadedUrls,
+						currentDateAndTime: data.currentDateAndTime
+					});
+				}
 			}
 		};
+		fetchData();
+	}, [documentId]);
 
-		loadPost();
-	}, [postId]);
-
-	const handleImageChange = (event: ChangeEvent<HTMLInputElement>) => {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		if (event.target.files) {
 			const newFiles = Array.from(event.target.files);
 
-			// Filter out non-image files (if any) before adding
-			const imageFiles = newFiles.filter(file =>
-				file.type.startsWith("image/")
+			// 이미지와 비디오 파일 모두 필터링
+			const mediaFiles = newFiles.filter(
+				file => file.type.startsWith("image/") || file.type.startsWith("video/")
 			);
 
-			setPostData(prevData => ({
-				...prevData,
-				mediaFiles: [...prevData.mediaFiles, ...imageFiles].slice(0, maxFiles)
-			}));
+			setPostData(prevData => {
+				if (!prevData) {
+					return null;
+				}
+				// 기존 파일과 새 파일을 합치고, maxFiles 제한 적용
+				const updatedUrls = [...prevData.uploadedUrls, ...mediaFiles].slice(
+					0,
+					maxFiles
+				);
+				return {
+					...prevData,
+					uploadedUrls: updatedUrls
+				};
+			});
 		}
 	};
 
 	const handleFileDeletion = (index: number) => {
 		setPostData(prevData => {
-			const updatedMediaFiles = [...prevData.mediaFiles];
-			updatedMediaFiles.splice(index, 1);
-			return {
-				...prevData,
-				mediaFiles: updatedMediaFiles
-			};
+			if (!prevData) return null;
+			const updatedUploadedUrls = [...prevData.uploadedUrls];
+			updatedUploadedUrls.splice(index, 1);
+			return {...prevData, uploadedUrls: updatedUploadedUrls};
 		});
 	};
 
 	const handleContentChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-		setPostData(prevData => ({
-			...prevData,
+		setPostData((prevData: PostData | null) => ({
+			...prevData!,
 			content: e.target.value
 		}));
 	};
 
 	const handleHashtagsChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
-		setPostData(prevData => ({
-			...prevData,
-			hashtags: e.target.value
+		setPostData((prevData: PostData | null) => ({
+			...prevData!,
+			hashtags: e.target.value // Update hashtags property
 		}));
 	};
 
-	const handleSave = () => {
-		// 수정 내용 저장 로직
-	};
-
-	const handleDelete = () => {
-		// 포스트 삭제 로직
+	const handleSave = async () => {
+		if (documentId && postData) {
+			try {
+				await updatePost(documentId, postData);
+				console.log("Post updated successfully");
+				// Redirect to My Page after a successful update
+				navigate("/"); // Replace "/my-page" with your actual route
+			} catch (error) {
+				console.error("Failed to update post:", error);
+			}
+		}
 	};
 
 	const handleCancel = () => {
-		// 취소 로직
+		navigate("/");
 	};
+
+	const handleDelete = async () => {
+		if (documentId) {
+			try {
+				// Call your deletePost API function with the documentId
+				await deletePost(documentId);
+				console.log("Post deleted successfully");
+				navigate("/");
+			} catch (error) {
+				console.error("Failed to delete post:", error);
+			}
+		}
+	};
+
+	const isEditing = true;
 
 	return (
 		<Layout>
 			<Container>
-				<EditPostTop
-					temperature={postData.temperature}
-					location={postData.location}
-					date={postData.createdAt}
-				/>
-				<EditImage
-					mediaFiles={postData.mediaFiles}
-					onImageChange={handleImageChange}
-					onImageDelete={handleFileDeletion}
-					maxFiles={maxFiles}
-				/>
-				<EditContent
-					content={postData.content}
-					hashtags={postData.hashtags}
-					handleContentChange={handleContentChange}
-					handleHashtagsChange={handleHashtagsChange}
-				/>
-				<PostButton
-					onSave={handleSave}
-					onDelete={handleDelete}
-					onCancel={handleCancel}
-					isEditing={true}
-				/>
+				{postData ? (
+					<>
+						<EditPostTop
+							temperature={postData.temperature}
+							location={postData.location}
+							currentDateAndTime={postData.currentDateAndTime}
+						/>
+						<EditImage
+							uploadedUrls={postData.uploadedUrls}
+							onImageChange={handleImageChange}
+							onImageDelete={handleFileDeletion}
+							maxFiles={maxFiles}
+						/>
+						<EditContent
+							content={postData.content}
+							hashtags={[postData.hashtags]}
+							handleContentChange={handleContentChange}
+							handleHashtagsChange={handleHashtagsChange}
+						/>
+						<PostButton
+							onSave={handleSave}
+							onCancel={handleCancel}
+							isEditing={isEditing}
+							onDelete={handleDelete}
+						/>
+					</>
+				) : (
+					<p>Loading post data...</p>
+				)}
 			</Container>
 		</Layout>
 	);

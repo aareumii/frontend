@@ -14,13 +14,14 @@ import {Container} from "./NewPostStyles";
 // eslint-disable-next-line @typescript-eslint/naming-convention
 import PostButton from "./PostButton";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import {useNavigate} from "react-router";
 
 import axios from "axios";
 
 interface NewPostProps {}
 
 const NewPost: React.FC<NewPostProps> = () => {
+	const navigate = useNavigate();
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [location, setLocation] = useState<string>("");
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -28,6 +29,11 @@ const NewPost: React.FC<NewPostProps> = () => {
 	const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
 	const [content, setContent] = useState<string>("");
 	const [hashtags, setHashtags] = useState<string>("");
+
+	const formatDate = (date: Date): string => {
+		return date.toISOString().replace("T", " ").substring(0, 19);
+	};
+	const currentDateAndTime = formatDate(new Date());
 
 	const handleLocationChange = (newLocation: string) => {
 		setLocation(newLocation);
@@ -63,10 +69,11 @@ const NewPost: React.FC<NewPostProps> = () => {
 		}
 		formData.append("location", location);
 		formData.append("hashtags", hashtags);
+		formData.append("currentDateAndTime", currentDateAndTime);
 
 		// 업로드된 URL을 FormData에 추가
-		uploadedUrls.forEach((url, index) => {
-			formData.append(`uploadedUrls[${index}]`, url);
+		uploadedUrls.forEach(url => {
+			formData.append("uploadedUrls[]", url);
 		});
 
 		try {
@@ -76,13 +83,13 @@ const NewPost: React.FC<NewPostProps> = () => {
 				{
 					headers: {
 						// eslint-disable-next-line @typescript-eslint/naming-convention
-						"Content-Type": "multipart/form-data"
+						"Content-Type": "multipart/form-data" // 이 줄 추가
 					}
 				}
 			);
 			console.log("Post saved:", response.data);
+			navigate("/");
 			alert("게시물이 성공적으로 저장되었습니다.");
-			// 성공 후 추가적인 로직 (예: 페이지 리디렉션)
 		} catch (error) {
 			console.error("Error saving post:", error);
 			alert("게시물 저장 중 오류가 발생했습니다.");
@@ -99,6 +106,7 @@ const NewPost: React.FC<NewPostProps> = () => {
 				<PostTopWrap
 					onLocationUpdate={handleLocationChange}
 					onTemperatureChange={handleTemperatureChange}
+					currentDateAndTime={currentDateAndTime}
 				/>
 				<PostImage
 					onFilesChange={(urls: string[]) => handleFilesChange(urls)}

@@ -20,6 +20,7 @@ import {
 interface TopWrapProps {
 	onLocationUpdate: (location: string) => void;
 	onTemperatureChange: (temperature: number | null) => void;
+	currentDateAndTime: string;
 }
 
 const PostTopWrap: React.FC<TopWrapProps> = ({
@@ -27,7 +28,10 @@ const PostTopWrap: React.FC<TopWrapProps> = ({
 	onLocationUpdate
 }) => {
 	const navigate = useNavigate();
-
+	const formatDate = (date: Date): string => {
+		return date.toISOString().replace("T", " ").substring(0, 19);
+	};
+	const currentDateAndTime = formatDate(new Date());
 	const handleBack = () => {
 		navigate(-1);
 	};
@@ -42,13 +46,6 @@ const PostTopWrap: React.FC<TopWrapProps> = ({
 		console.log(location);
 		onLocationUpdate(location);
 	};
-
-	const date = new Date();
-	const currentDateAndTime = `${date.getFullYear()}-${String(
-		date.getMonth() + 1
-	).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")} ${String(
-		date.getHours()
-	).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
 
 	return (
 		<Wrap>
