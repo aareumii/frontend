@@ -2,12 +2,15 @@ import React from "react";
 import {useSelector, useDispatch} from "react-redux";
 import {RootState} from "../../redux/store/store";
 import {closeModal} from "../../redux/slice/modaSlice";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import {ModalTypes} from "./modalTypes";
 
 const ModalManager: React.FC = () => {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const {isOpen, type} = useSelector((state: RootState) => state.modal);
 	const dispatch = useDispatch();
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const handleClose = () => {
 		dispatch(closeModal());
 	};

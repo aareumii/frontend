@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from "react";
+import React, {useState, useEffect} from "react";
 import {IoIosArrowBack, IoIosArrowForward} from "react-icons/io";
 import {
 	Container,
@@ -34,38 +34,31 @@ const PostImage: React.FC<ImageWrapProps> = ({initialFiles, onFilesChange}) => {
 	const [currentFileIndex, setCurrentFileIndex] = useState<number>(0);
 	const [fileUrls, setFileUrls] = useState<string[]>([]);
 
-	const uploadFileToStorage = async (file: File): Promise<string> => {
+	const uploadFileToStorage = async (file: File): Promise<string | null> => {
+		if (!file || file.size === 0) {
+			return null;
+		}
 		const timestamp = new Date().getTime();
 		const storageRef = ref(storage, `images/${timestamp}-${file.name}`);
 		await uploadBytes(storageRef, file);
 		return getDownloadURL(storageRef);
 	};
 
-	// onFilesChange 함수에 대한 ref를 생성
-	const onFilesChangeRef = useRef(onFilesChange);
-	// 컴포넌트가 렌더링될 때마다 최신의 onFilesChange 함수를 ref에 할당
-	onFilesChangeRef.current = onFilesChange;
-
 	useEffect(() => {
 		const uploadFiles = async () => {
-			try {
-				const urls = await Promise.all(files.map(uploadFileToStorage));
-				setFileUrls(urls);
-				// 최신 onFilesChange 함수를 ref에서 가져와 사용
-				onFilesChangeRef.current(urls);
-			} catch (error) {
-				console.error("Error uploading files:", error);
-				alert("파일 업로드 중 에러가 발생했습니다.");
-			}
+			const urls = await Promise.all(files.map(uploadFileToStorage));
+			const validUrls = urls.filter((url): url is string => url !== null);
+			setFileUrls(validUrls);
+			onFilesChange(validUrls);
 		};
 
 		if (files.length > 0) {
 			uploadFiles();
 		} else {
 			setFileUrls([]);
-			onFilesChangeRef.current([]); // 여기도 ref를 사용
+			onFilesChange([]);
 		}
-	}, [files]); // onFilesChange를 의존성 배열에서 제거
+	}, [files]);
 
 	const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		if (event.target.files) {
@@ -78,9 +71,7 @@ const PostImage: React.FC<ImageWrapProps> = ({initialFiles, onFilesChange}) => {
 	};
 
 	const handleFileDeletion = (index: number) => {
-		// eslint-disable-next-line @typescript-eslint/naming-convention
 		const updatedFiles = files.filter((_, fileIndex) => fileIndex !== index);
-		// eslint-disable-next-line @typescript-eslint/naming-convention
 		const updatedUrls = fileUrls.filter((_, urlIndex) => urlIndex !== index);
 		setFiles(updatedFiles);
 		setFileUrls(updatedUrls);

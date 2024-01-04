@@ -1,6 +1,10 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires, no-undef
 const functions = require("firebase-functions");
+// eslint-disable-next-line @typescript-eslint/no-var-requires, no-undef
 const admin = require("firebase-admin");
+// eslint-disable-next-line no-undef, @typescript-eslint/no-var-requires
 const busboy = require("busboy");
+// eslint-disable-next-line no-undef, @typescript-eslint/no-var-requires
 const cors = require("cors")({origin: true});
 
 admin.initializeApp();

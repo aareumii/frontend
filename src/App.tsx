@@ -5,6 +5,7 @@ import Login from "./pages/login";
 import Signup from "./pages/SignUp";
 import NewPost from "./pages/post/NewPost";
 import EditPost from "./pages/post/EditPost";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import NotFound from "./pages/not-found/NotFound";
 
 import {BrowserRouter as Router, Routes, Route} from "react-router-dom";

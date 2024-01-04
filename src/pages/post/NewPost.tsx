@@ -15,6 +15,8 @@ import {Container} from "./NewPostStyles";
 import PostButton from "./PostButton";
 
 import {useNavigate} from "react-router";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import {getAuth} from "firebase/auth";
 
 import axios from "axios";
 
@@ -56,10 +58,24 @@ const NewPost: React.FC<NewPostProps> = () => {
 	};
 
 	const handleSave = async () => {
-		if (!content.trim() || uploadedUrls.length === 0) {
-			alert("내용과 이미지를 모두 입력해주세요.");
+		if (!content.trim()) {
+			alert("내용을 입력해주세요.");
 			return;
 		}
+
+		if (uploadedUrls.length === 0) {
+			alert("이미지를 업로드해주세요.");
+			return;
+		}
+
+		const auth = getAuth();
+		const user = auth.currentUser;
+		if (!user) {
+			alert("로그인 정보를 확인할 수 없습니다.");
+			return;
+		}
+
+		const uploadedUrlsAsString = uploadedUrls.map(url => url.toString());
 
 		// FormData 객체를 생성
 		const formData = new FormData();
@@ -72,9 +88,17 @@ const NewPost: React.FC<NewPostProps> = () => {
 		formData.append("currentDateAndTime", currentDateAndTime);
 
 		// 업로드된 URL을 FormData에 추가
-		uploadedUrls.forEach(url => {
-			formData.append("uploadedUrls[]", url);
+		// uploadedUrls.forEach((url, index) => {
+		// 	formData.append(`uploadedUrls[${index}]`, url);
+		// });
+
+		uploadedUrlsAsString.forEach((url, index) => {
+			formData.append(`uploadedUrls[${index}]`, url);
 		});
+
+		formData.append("userId", user.uid); // 사용자 고유 ID
+		const userName = user.displayName || user.email || "";
+		formData.append("userName", userName);
 
 		try {
 			const response = await axios.post(
@@ -108,9 +132,7 @@ const NewPost: React.FC<NewPostProps> = () => {
 					onTemperatureChange={handleTemperatureChange}
 					currentDateAndTime={currentDateAndTime}
 				/>
-				<PostImage
-					onFilesChange={(urls: string[]) => handleFilesChange(urls)}
-				/>
+				<PostImage onFilesChange={handleFilesChange} />
 				<PostContent
 					content={content}
 					hashtags={hashtags}
